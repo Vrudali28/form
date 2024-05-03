@@ -1,33 +1,20 @@
+// AdminDashboard.js
 import React, { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import "./AdminDashboard.css"; // Import your CSS file for styling
 
 function AdminDashboard() {
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
 
-  const handleAddBook = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newBook = {
-      title: formData.get("title"),
-      author: formData.get("author"),
-      isbn: formData.get("isbn"),
-      publicationDate: formData.get("publicationDate"),
-    };
-    setBooks([...books, newBook]);
-    e.target.reset();
+  const handleAddBook = (values, { resetForm }) => {
+    setBooks([...books, values]);
+    resetForm();
   };
 
-  const handleAddAuthor = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newAuthor = {
-      name: formData.get("name"),
-      birthDate: formData.get("birthDate"),
-      biography: formData.get("biography"),
-    };
-    setAuthors([...authors, newAuthor]);
-    e.target.reset();
+  const handleAddAuthor = (values, { resetForm }) => {
+    setAuthors([...authors, values]);
+    resetForm();
   };
 
   const handleDeleteBook = (index) => {
@@ -46,18 +33,46 @@ function AdminDashboard() {
     <div className="admin-dashboard">
       <div className="books-section">
         <h2>Books</h2>
-        <form onSubmit={handleAddBook}>
-          <input type="text" name="title" placeholder="Title" required />
-          <input type="text" name="author" placeholder="Author" required />
-          <input type="text" name="isbn" placeholder="ISBN" required />
-          <input type="date" name="publicationDate" required />
-          <button type="submit">Add Book</button>
-        </form>
+        <Formik
+          initialValues={{ title: "", author: "", isbn: "", publicationDate: "" }}
+          validate={(values) => {
+            const errors = {};
+            if (!values.title) {
+              errors.title = "Title is required";
+            }
+            if (!values.author) {
+              errors.author = "Author is required";
+            }
+            if (!values.isbn) {
+              errors.isbn = "ISBN is required";
+            }
+            if (!values.publicationDate) {
+              errors.publicationDate = "Publication date is required";
+            }
+            return errors;
+          }}
+          onSubmit={handleAddBook}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <Field type="text" name="title" placeholder="Title" />
+              <ErrorMessage name="title" component="div" className="error" />
+              <Field type="text" name="author" placeholder="Author" />
+              <ErrorMessage name="author" component="div" className="error" />
+              <Field type="text" name="isbn" placeholder="ISBN" />
+              <ErrorMessage name="isbn" component="div" className="error" />
+              <Field type="date" name="publicationDate" />
+              <ErrorMessage name="publicationDate" component="div" className="error" />
+              <button type="submit" disabled={isSubmitting}>
+                Add Book
+              </button>
+            </Form>
+          )}
+        </Formik>
         <ul>
           {books.map((book, index) => (
             <li key={index}>
-              {book.title} - {book.author} - {book.isbn} -{" "}
-              {book.publicationDate}
+              {book.title} - {book.author} - {book.isbn} - {book.publicationDate}
               <button onClick={() => handleDeleteBook(index)}>Delete</button>
             </li>
           ))}
@@ -66,12 +81,37 @@ function AdminDashboard() {
 
       <div className="authors-section">
         <h2>Authors</h2>
-        <form onSubmit={handleAddAuthor}>
-          <input type="text" name="name" placeholder="Name" required />
-          <input type="date" name="birthDate" required />
-          <textarea name="biography" placeholder="Biography" required />
-          <button type="submit">Add Author</button>
-        </form>
+        <Formik
+          initialValues={{ name: "", birthDate: "", biography: "" }}
+          validate={(values) => {
+            const errors = {};
+            if (!values.name) {
+              errors.name = "Name is required";
+            }
+            if (!values.birthDate) {
+              errors.birthDate = "Birth date is required";
+            }
+            if (!values.biography) {
+              errors.biography = "Biography is required";
+            }
+            return errors;
+          }}
+          onSubmit={handleAddAuthor}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <Field type="text" name="name" placeholder="Name" />
+              <ErrorMessage name="name" component="div" className="error" />
+              <Field type="date" name="birthDate" />
+              <ErrorMessage name="birthDate" component="div" className="error" />
+              <Field as="textarea" name="biography" placeholder="Biography" />
+              <ErrorMessage name="biography" component="div" className="error" />
+              <button type="submit" disabled={isSubmitting}>
+                Add Author
+              </button>
+            </Form>
+          )}
+        </Formik>
         <ul>
           {authors.map((author, index) => (
             <li key={index}>
